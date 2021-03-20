@@ -44,7 +44,7 @@ class Bert(nn.Module):
     def __init__(self, temp_dir, load_pretrained_bert, bert_config):
         super(Bert, self).__init__()
         if(load_pretrained_bert):
-            self.model = BertModel.from_pretrained('bert-base-uncased', cache_dir=temp_dir)
+            self.model = BertModel.from_pretrained('/Users/jisoo/Downloads/001_bert_morp_pytorch', cache_dir=temp_dir)
         else:
             self.model = BertModel(bert_config)
 

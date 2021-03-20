@@ -28,10 +28,18 @@ class Batch(object):
 
             labels = torch.tensor(self._pad(pre_labels, 0))
             segs = torch.tensor(self._pad(pre_segs, 0))
-            mask = 1 - (src == 0)
+            
+            #Upgrade to new masking system, SG edit 9-30-19
+            mask = ~(src == 0)
+#             mask = 1 - (src == 0)
 
             clss = torch.tensor(self._pad(pre_clss, -1))
-            mask_cls = 1 - (clss == -1)
+    
+            #Upgrade to new masking system, SG edit 9-30-19
+            mask_cls = ~(clss == -1)
+#             mask_cls = 1 - (clss == -1)
+        
+        
             clss[clss == -1] = 0
 
             setattr(self, 'clss', clss.to(device))
@@ -42,10 +50,12 @@ class Batch(object):
             setattr(self, 'mask', mask.to(device))
 
             if (is_test):
-                src_str = [x[-2] for x in data]
+                src_str = [x[-3] for x in data]
                 setattr(self, 'src_str', src_str)
-                tgt_str = [x[-1] for x in data]
+                tgt_str = [x[-2] for x in data]
                 setattr(self, 'tgt_str', tgt_str)
+#                paper_id = [x[-1] for x in data]
+#                setattr(self, 'paper_id', paper_id)
 
     def __len__(self):
         return self.batch_size
@@ -80,8 +90,10 @@ def load_dataset(args, corpus_type, shuffle):
     assert corpus_type in ["train", "valid", "test"]
 
     def _lazy_dataset_loader(pt_file, corpus_type):
+        logger.info('Loading %s dataset from %s' %
+                    (corpus_type, pt_file))
         dataset = torch.load(pt_file)
-        logger.info('Loading %s dataset from %s, number of examples: %d' %
+        logger.info('Loaded %s dataset from %s, number of examples: %d' %
                     (corpus_type, pt_file, len(dataset)))
         return dataset
 
@@ -97,8 +109,40 @@ def load_dataset(args, corpus_type, shuffle):
         # Only one inputters.*Dataset, simple!
         pt = args.bert_data_path + '.' + corpus_type + '.pt'
         yield _lazy_dataset_loader(pt, corpus_type)
+        
+        
+def load_datasetToCSVNewData(args, corpus_type, shuffle):
+    """
+    Dataset generator. Don't do extra stuff here, like printing,
+    because they will be postponed to the first loading time.
 
+    Args:
+        corpus_type: 'train' or 'valid'
+    Returns:
+        A list of dataset, the dataset(s) are lazily loaded.
+    """
+    assert corpus_type in ["train", "valid", "test"]
 
+    def _lazy_dataset_loader(pt_file, corpus_type):
+        logger.info('Loading %s dataset from %s' %
+                    (corpus_type, pt_file))
+        dataset = torch.load(pt_file)
+        logger.info('Loaded %s dataset from %s, number of examples: %d' %
+                    (corpus_type, pt_file, len(dataset)))
+        return dataset
+
+    # Sort the glob output by file name (by increasing indexes).
+    pts = sorted(glob.glob(args.bert_data_path + '*.pt'))
+    if pts:
+        if (shuffle):
+            random.shuffle(pts)
+
+        for pt in pts:
+            yield _lazy_dataset_loader(pt, corpus_type)
+    else:
+        # Only one inputters.*Dataset, simple!
+        pt = args.bert_data_path + '.' + corpus_type + '.pt'
+        yield _lazy_dataset_loader(pt, corpus_type)
 def simple_batch_size_fn(new, count):
     src, labels = new[0], new[1]
     global max_n_sents, max_n_tokens, max_size
@@ -184,9 +228,11 @@ class DataIterator(object):
         clss = ex['clss']
         src_txt = ex['src_txt']
         tgt_txt = ex['tgt_txt']
+#        paper_id = ex['paper_id']
 
         if(is_test):
             return src,labels,segs, clss, src_txt, tgt_txt
+#            paper_id
         else:
             return src,labels,segs, clss
 
