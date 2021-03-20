@@ -42,6 +42,7 @@ if __name__ == '__main__':
     parser.add_argument("-map_path", default='../data/')
     parser.add_argument("-raw_path", default='../json_data/')
     parser.add_argument("-save_path", default='../bert_data/')
+    parser.add_argument("-vocab_file_path", default='../vocab_file/')
 
     parser.add_argument("-shard_size", default=2000, type=int)
     parser.add_argument('-min_nsents', default=3, type=int)
@@ -51,7 +52,7 @@ if __name__ == '__main__':
 
     parser.add_argument("-lower", type=str2bool, nargs='?',const=True,default=True)
 
-    parser.add_argument('-log_file', default='../../logs/cnndm.log')
+#    parser.add_argument('-log_file', default='../../logs/cnndm.log')
 
     parser.add_argument('-dataset', default='', help='train, valid or test, defaul will process all datasets')
 
@@ -59,5 +60,5 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    init_logger(args.log_file)
+#    init_logger(args.log_file)
     eval('data_builder.'+args.mode + '(args)')

@@ -7,6 +7,8 @@ import os
 import re
 import subprocess
 import time
+import collections
+import six
 from os.path import join as pjoin
 
 import torch
@@ -17,6 +19,64 @@ from others.logging import logger
 from others.utils import clean
 from prepro.utils import _get_word_ngrams
 
+
+def convert_to_unicode(text):
+    """Converts `text` to Unicode (if it's not already), assuming utf-8 input."""
+    if six.PY3:
+        if isinstance(text, str):
+            return text
+        elif isinstance(text, bytes):
+            return text.decode("utf-8", "ignore")
+        else:
+            raise ValueError("Unsupported string type: %s" % (type(text)))
+    elif six.PY2:
+        if isinstance(text, str):
+            return text.decode("utf-8", "ignore")
+        elif isinstance(text, unicode):
+            return text
+        else:
+            raise ValueError("Unsupported string type: %s" % (type(text)))
+    else:
+        raise ValueError("Not running on Python2 or Python 3?")
+
+class Tokenizer(object):
+    def __init__(self, vocab_file_path):
+        self.vocab_file_path = vocab_file_path
+        """Loads a vocabulary file into a dictionary."""
+        vocab = collections.OrderedDict()
+        index = 0
+        with open(self.vocab_file_path, "r") as reader:
+
+            while True:
+                token = convert_to_unicode(reader.readline())
+                if not token:
+                    break
+
+          ### joonho.lim @ 2019-03-15
+                if token.find('n_iters=') == 0 or token.find('max_length=') == 0 :
+
+                    continue
+                token = token.split('\t')[0].strip('_')
+
+                token = token.strip()
+                vocab[token] = index
+                index += 1
+        self.vocab = vocab
+    def convert_tokens_to_ids(self, tokens):
+        """Converts a sequence of tokens into ids using the vocab."""
+        ids = []
+        for token in tokens:
+            try:
+                ids.append(self.vocab[token])
+            except:
+                ids.append(1)
+        if len(ids) > 10000:
+            raise ValueError(
+                "Token indices sequence length is longer than the specified maximum "
+                " sequence length for this BERT model ({} > {}). Running this"
+                " sequence through BERT will result in indexing errors".format(len(ids), 10000)
+            )
+        return ids
 
 def load_json(p, lower):
     source = []
@@ -144,7 +204,7 @@ def hashhex(s):
 class BertData():
     def __init__(self, args):
         self.args = args
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+        self.tokenizer = Tokenizer(self.args.vocab_file_path)
         self.sep_vid = self.tokenizer.vocab['[SEP]']
         self.cls_vid = self.tokenizer.vocab['[CLS]']
         self.pad_vid = self.tokenizer.vocab['[PAD]']
@@ -176,7 +236,7 @@ class BertData():
         # text = [' '.join(ex['src_txt'][i].split()[:self.args.max_src_ntokens]) for i in idxs]
         # text = [_clean(t) for t in text]
         text = ' [SEP] [CLS] '.join(src_txt)
-        src_subtokens = self.tokenizer.tokenize(text)
+        src_subtokens = text.split(' ')
         src_subtokens = src_subtokens[:510]
         src_subtokens = ['[CLS]'] + src_subtokens + ['[SEP]']
 
@@ -195,6 +255,7 @@ class BertData():
         tgt_txt = '<q>'.join([' '.join(tt) for tt in tgt])
         src_txt = [original_src_txt[i] for i in idxs]
         return src_subtoken_idxs, labels, segments_ids, cls_ids, src_txt, tgt_txt
+        
 
 
 def format_to_bert(args):
