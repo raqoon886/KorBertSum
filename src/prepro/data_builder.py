@@ -45,7 +45,7 @@ class Tokenizer(object):
         """Loads a vocabulary file into a dictionary."""
         vocab = collections.OrderedDict()
         index = 0
-        with open(self.vocab_file_path, "r") as reader:
+        with open(self.vocab_file_path, "r", encoding='utf-8') as reader:
 
             while True:
                 token = convert_to_unicode(reader.readline())
