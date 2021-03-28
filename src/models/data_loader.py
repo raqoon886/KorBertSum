@@ -50,9 +50,9 @@ class Batch(object):
             setattr(self, 'mask', mask.to(device))
 
             if (is_test):
-                src_str = [x[-3] for x in data]
+                src_str = [x[4] for x in data]
                 setattr(self, 'src_str', src_str)
-                tgt_str = [x[-2] for x in data]
+                tgt_str = [x[5] for x in data]
                 setattr(self, 'tgt_str', tgt_str)
 #                paper_id = [x[-1] for x in data]
 #                setattr(self, 'paper_id', paper_id)

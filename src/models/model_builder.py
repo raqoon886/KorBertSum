@@ -41,10 +41,10 @@ def build_optim(args, model, checkpoint):
 
 
 class Bert(nn.Module):
-    def __init__(self, temp_dir, load_pretrained_bert, bert_config):
+    def __init__(self, args, load_pretrained_bert, bert_config):
         super(Bert, self).__init__()
         if(load_pretrained_bert):
-            self.model = BertModel.from_pretrained('/Users/jisoo/Downloads/001_bert_morp_pytorch', cache_dir=temp_dir)
+            self.model = BertModel.from_pretrained(args.bert_model)
         else:
             self.model = BertModel(bert_config)
 
@@ -60,21 +60,22 @@ class Summarizer(nn.Module):
         super(Summarizer, self).__init__()
         self.args = args
         self.device = device
-        self.bert = Bert(args.temp_dir, load_pretrained_bert, bert_config)
+        self.bert = Bert(args, load_pretrained_bert = True, bert_config=BertConfig.from_json_file(args.bert_config_path))
+        self.bert_config = BertConfig.from_json_file(args.bert_config_path)
         if (args.encoder == 'classifier'):
-            self.encoder = Classifier(self.bert.model.config.hidden_size)
+            self.encoder = Classifier(self.bert_config.hidden_size)
         elif(args.encoder=='transformer'):
-            self.encoder = TransformerInterEncoder(self.bert.model.config.hidden_size, args.ff_size, args.heads,
+            self.encoder = TransformerInterEncoder(self.bert_config.hidden_size, args.ff_size, args.heads,
                                                    args.dropout, args.inter_layers)
         elif(args.encoder=='rnn'):
             self.encoder = RNNEncoder(bidirectional=True, num_layers=1,
-                                      input_size=self.bert.model.config.hidden_size, hidden_size=args.rnn_size,
+                                      input_size=self.bert_config.hidden_size, hidden_size=args.rnn_size,
                                       dropout=args.dropout)
         elif (args.encoder == 'baseline'):
-            bert_config = BertConfig(self.bert.model.config.vocab_size, hidden_size=args.hidden_size,
+            bert_config = BertConfig(self.bert_config.vocab_size, hidden_size=args.hidden_size,
                                      num_hidden_layers=6, num_attention_heads=8, intermediate_size=args.ff_size)
             self.bert.model = BertModel(bert_config)
-            self.encoder = Classifier(self.bert.model.config.hidden_size)
+            self.encoder = Classifier(self.bert_config.hidden_size)
 
         if args.param_init != 0.0:
             for p in self.encoder.parameters():

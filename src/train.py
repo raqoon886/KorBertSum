@@ -280,7 +280,7 @@ if __name__ == '__main__':
 
     parser.add_argument("-encoder", default='classifier', type=str, choices=['classifier','transformer','rnn','baseline'])
     parser.add_argument("-mode", default='train', type=str, choices=['train','validate','test'])
-    parser.add_argument("-bert_data_path", default='../bert_data/cnndm')
+    parser.add_argument("-bert_data_path", default='../bert_data/korean')
     parser.add_argument("-model_path", default='../models/')
     parser.add_argument("-result_path", default='../results/cnndm')
     parser.add_argument("-temp_dir", default='../temp')
@@ -319,6 +319,7 @@ if __name__ == '__main__':
     parser.add_argument('-log_file', default='../logs/cnndm.log')
     parser.add_argument('-dataset', default='')
     parser.add_argument('-seed', default=666, type=int)
+    parser.add_argument('-bert_model', default='', type=str)
 
     parser.add_argument("-test_all", type=str2bool, nargs='?',const=True,default=False)
     parser.add_argument("-test_from", default='')
@@ -326,6 +327,7 @@ if __name__ == '__main__':
     parser.add_argument("-report_rouge", type=str2bool, nargs='?',const=True,default=True)
     parser.add_argument("-block_trigram", type=str2bool, nargs='?', const=True, default=True)
 
+#    args = parser.parse_args(args=[])
     args = parser.parse_args()
     args.gpu_ranks = [int(i) for i in args.gpu_ranks.split(',')]
     os.environ["CUDA_VISIBLE_DEVICES"] = args.visible_gpus

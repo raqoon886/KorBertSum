@@ -270,7 +270,7 @@ class Trainer(object):
                             if(len(batch.src_str[i])==0):
                                 continue
                             for j in selected_ids[i][:len(batch.src_str[i])]:
-                                if(j>=len( batch.src_str[i])):
+                                if(j>=len(batch.src_str[i])):
                                     continue
                                 candidate = batch.src_str[i][j].strip()
                                 if(self.args.block_trigram):
