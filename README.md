@@ -9,7 +9,7 @@
 해당 문서의 원저작권은 Nlpyang의 [BertSum](https://github.com/nlpyang/BertSum) 에 있습니다.
 
 To run etri-api-scraper.py
-'''
+"""
 python etri_api_scraper.py --input '.../train.jsonl' --api_key 'openapi key' --first_index 0 --last_index 5000
-'''
+"""
 
