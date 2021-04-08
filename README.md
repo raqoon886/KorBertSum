@@ -45,3 +45,8 @@ python train.py -mode train -encoder classifier -dropout 0.1 -bert_data_path ../
 위의 코드에서 -mode test -test_from bert_model_path 로 수정하면 됩니다.
 
 실행 예시 파일 Newsdata_extractive_summ.ipynb 에 실행 예시가 있습니다.
+
+
+##CHATBOT
+
+Newsdata_summarybot.ipynb 에 실행 예시가 있습니다.
