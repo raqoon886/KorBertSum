@@ -47,6 +47,6 @@ python train.py -mode train -encoder classifier -dropout 0.1 -bert_data_path ../
 실행 예시 파일 Newsdata_extractive_summ.ipynb 에 실행 예시가 있습니다.
 
 
-##CHATBOT
+## CHATBOT
 
 Newsdata_summarybot.ipynb 에 실행 예시가 있습니다.
