@@ -50,4 +50,4 @@ python train.py -mode train -encoder classifier -dropout 0.1 -bert_data_path ../
 ## CHATBOT
 
 Newsdata_summarybot.ipynb 에 실행 예시가 있습니다.
-![alt text](https://github.com/raqoon886/KoBertSum/tree/master/summbot.png?raw=true)
+![alt text](https://github.com/raqoon886/KoBertSum/tree/master/summbot.png)
