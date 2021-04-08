@@ -215,6 +215,31 @@ def test(args, device_id, pt, step):
     trainer = build_trainer(args, device_id, model, None)
     trainer.test(test_iter,step)
 
+def summary(args, device_id, pt, step):
+
+    device = "cpu" if args.visible_gpus == '-1' else "cuda"
+    if (pt != ''):
+        test_from = pt
+    else:
+        test_from = args.test_from
+    logger.info('Loading checkpoint from %s' % test_from)
+    checkpoint = torch.load(test_from, map_location=lambda storage, loc: storage)
+    opt = vars(checkpoint['opt'])
+    for k in opt.keys():
+        if (k in model_flags):
+            setattr(args, k, opt[k])
+    print(args)
+
+    config = BertConfig.from_json_file(args.bert_config_path)
+    model = Summarizer(args, device, load_pretrained_bert=False, bert_config = config)
+    model.load_cp(checkpoint)
+    model.eval()
+
+    test_iter =data_loader.Dataloader(args, load_dataset(args, 'test', shuffle=False),
+                                  args.batch_size, device,
+                                  shuffle=False, is_test=True)
+    trainer = build_trainer(args, device_id, model, None)
+    trainer.summary(test_iter,step)
 
 def baseline(args, cal_lead=False, cal_oracle=False):
 
@@ -279,7 +304,7 @@ if __name__ == '__main__':
 
 
     parser.add_argument("-encoder", default='classifier', type=str, choices=['classifier','transformer','rnn','baseline'])
-    parser.add_argument("-mode", default='train', type=str, choices=['train','validate','test'])
+    parser.add_argument("-mode", default='train', type=str, choices=['train','validate','test','summary'])
     parser.add_argument("-bert_data_path", default='../bert_data/korean')
     parser.add_argument("-model_path", default='../models/')
     parser.add_argument("-result_path", default='../results/cnndm')
@@ -353,3 +378,11 @@ if __name__ == '__main__':
         except:
             step = 0
         test(args, device_id, cp, step)
+        
+    elif (args.mode == 'summary'):
+        cp = args.test_from
+        try:
+            step = int(cp.split('.')[-2].split('_')[-1])
+        except:
+            step = 0
+        summary(args, device_id, cp, step)
