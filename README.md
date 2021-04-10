@@ -12,6 +12,9 @@ Some codes are borrowed from ONMT(https://github.com/OpenNMT/OpenNMT-py)
 
 ### 해당 문서의 원저작권은 Nlpyang의 [BertSum](https://github.com/nlpyang/BertSum) 에 있습니다.
 
+### **[저의 벨로그](https://velog.io/@raqoon886/KorBertSum-SummaryBot)** 에 코드와 플로우 설명이 있습니다.
+
+
 #### Step 1. Prepare Data
 
 To run etri-api-scraper.py
@@ -51,3 +54,4 @@ python train.py -mode train -encoder classifier -dropout 0.1 -bert_data_path ../
 
 Newsdata_summarybot.ipynb 에 실행 예시가 있습니다.
 ![example](https://github.com/raqoon886/KoBertSum/tree/master/summbot.png)
+
